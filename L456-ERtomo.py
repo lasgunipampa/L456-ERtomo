@@ -2,9 +2,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
+from matplotlib.patches import Polygon
+from matplotlib.widgets import PolygonSelector
+
 
 # Load data from the .dat file
 data = np.loadtxt('./DATA/data_res.dat')
+
 
 # Extract distance, depth, resistivity, and conductivity
 distance = data[:, 0]
@@ -24,11 +28,33 @@ interp_lin = tri.LinearTriInterpolator(interp_tri, resistivity)
 resistivity_interp = interp_lin(xi, yi)
 
 # Create the tomography plot
-plt.figure(figsize=(8, 2), num='L456 - ERtomo')
-plt.imshow(resistivity_interp, origin='lower', extent=(min(distance), max(distance), min(depth), max(depth)), aspect='auto', cmap='jet')
-plt.colorbar(label='Resistivity')
-plt.scatter(distance, depth, c=resistivity, cmap='jet', edgecolors='k', alpha=0.1)
-plt.xlabel('Distance (m)')
-plt.ylabel('Depth (m)')
-plt.title('2D Electrical Resistivity Tomography')
+fig, ax = plt.subplots(figsize=(12, 4), num='L456 - ERtomo')
+ax.imshow(resistivity_interp, origin='lower', extent=(min(distance), max(distance), min(depth), max(depth)), aspect='auto', cmap='jet')
+scatter = ax.scatter(distance, depth, c=resistivity, cmap='jet', edgecolors='k', alpha=0.5, marker='o')
+ax.set_xlabel('Distance (m)')
+ax.set_ylabel('Depth (m)')
+ax.set_title('2D Electrical Resistivity Tomography')
+
+# Define a list to store the polygon coordinates
+polygon_coords = []
+
+# Function to update the plot with the polygon
+def update_polygon(selected_polygon):
+    polygon = Polygon(selected_polygon, closed=True, fill=None, edgecolor='red')
+    ax.add_patch(polygon)
+    plt.draw()
+
+# Function to handle mouse events
+def onselect(verts):
+    if len(verts) > 2:
+        selected_polygon = np.array(verts)
+        update_polygon(selected_polygon)
+
+# Create the PolygonSelector
+poly_selector = PolygonSelector(ax, onselect)
+
+# Save the plot
+plt.savefig('tomography_plot.png', dpi=300, bbox_inches='tight')
+
+# Show the plot
 plt.show()
