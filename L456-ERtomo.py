@@ -7,6 +7,7 @@ from matplotlib.patches import Polygon
 from matplotlib.widgets import PolygonSelector
 
 data_file_path = ''  # Define data_file_path globally
+invalid_data_format_msg = "This file has no valid data format! Make sure the input data (.dat file) has 4 columns."
 
 def create_plots():
     global data_file_path
@@ -25,8 +26,8 @@ def create_plots():
 
         # Check if the data has four columns
         if data.shape[1] != 4:
-            messagebox.showinfo("Error", "This file has no valid data format! Make sure the input data (.dat file) has 4 columns.")
-            print("This file has no valid data format! Make sure the input data (.dat file) has 4 columns.")
+            messagebox.showinfo("Error", invalid_data_format_msg)
+            print(invalid_data_format_msg)
             return
 
         # Rest of the code for creating plots...
@@ -132,8 +133,6 @@ def create_plots():
         plt.show()
 
     except Exception as e:
-        #messagebox.showinfo("Error", "An error occurred while loading the data file.")
-        #print("An error occurred while loading the data file:", e)
         error_message = f"An error occurred while loading the data file:\n{str(e)}"
         messagebox.showinfo("Error", error_message)
         print(error_message)
@@ -156,7 +155,7 @@ def select_data_file():
 
         # Check if the data has four columns
         if data.shape[1] != 4:
-            messagebox.showinfo("Error", "This file has no valid data format! Make sure the input data (.dat file) has 4 columns.")
+            messagebox.showinfo("Error", invalid_data_format_msg)
             data_file_path = ''  # Reset data_file_path if the data format is invalid
             return
 
