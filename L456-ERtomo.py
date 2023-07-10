@@ -1,25 +1,12 @@
-# Import necessary libraries
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 from matplotlib.patches import Polygon
 from matplotlib.widgets import PolygonSelector
-from tkinter import Tk, filedialog
-import sys
+from tkinter import Tk, filedialog, Button, Menu
 
-# Create a Tkinter root window (hidden)
-root = Tk()
-root.withdraw()
 
-# Ask for the .dat file using a file dialog
-data_file_path = filedialog.askopenfilename(title="Select .dat Data File", filetypes=[("DAT Files", "*.dat")])
-
-# Check if a file was selected
-if not data_file_path:
-    print("No input file selected.")
-    sys.exit()
-
-try:
+def create_plots():
     # Load data from the .dat file
     data = np.loadtxt(data_file_path)
 
@@ -41,8 +28,10 @@ try:
     resistivity_interp = interp_lin_res(xi, yi)
 
     # Create the tomography plot for Resistivity
-    fig, ax_res = plt.subplots(figsize=(12, 4), num='L456 - ERtomo Resistivity')
-    image_res = ax_res.imshow(resistivity_interp, origin='lower', extent=(min(distance), max(distance), min(depth), max(depth)), aspect='auto', cmap='jet')
+    fig_res, ax_res = plt.subplots(figsize=(12, 4), num='L456 - ERtomo Resistivity')
+    image_res = ax_res.imshow(resistivity_interp, origin='lower',
+                              extent=(min(distance), max(distance), min(depth), max(depth)),
+                              aspect='auto', cmap='jet')
     scatter_res = ax_res.scatter(distance, depth, c=resistivity, cmap='jet', edgecolors='k', alpha=0.5, marker='o')
     ax_res.set_xlabel('Distance (m)')
     ax_res.set_ylabel('Depth (m)')
@@ -74,17 +63,16 @@ try:
     # Create the PolygonSelector for Resistivity
     poly_selector_res = PolygonSelector(ax_res, onselect_res)
 
-    # Save the Resistivity plot
-    plt.savefig('tomography_plot_resistivity.png', dpi=300, bbox_inches='tight')
-
     # Perform grid data interpolation for Conductivity
     interp_tri_con = tri.Triangulation(distance, depth)
     interp_lin_con = tri.LinearTriInterpolator(interp_tri_con, conductivity)
     conductivity_interp = interp_lin_con(xi, yi)
 
     # Create the tomography plot for Conductivity
-    fig, ax_con = plt.subplots(figsize=(12, 4), num='L456 - ERtomo Conductivity')
-    image_con = ax_con.imshow(conductivity_interp, origin='lower', extent=(min(distance), max(distance), min(depth), max(depth)), aspect='auto', cmap='jet')
+    fig_con, ax_con = plt.subplots(figsize=(12, 4), num='L456 - ERtomo Conductivity')
+    image_con = ax_con.imshow(conductivity_interp, origin='lower',
+                              extent=(min(distance), max(distance), min(depth), max(depth)),
+                              aspect='auto', cmap='jet')
     scatter_con = ax_con.scatter(distance, depth, c=conductivity, cmap='jet', edgecolors='k', alpha=0.5, marker='o')
     ax_con.set_xlabel('Distance (m)')
     ax_con.set_ylabel('Depth (m)')
@@ -101,7 +89,7 @@ try:
     # Define a list to store the polygon coordinates for Conductivity
     polygon_coords_con = []
 
-    # Function to update the plot with the polygon forConductivity
+    # Function to update the plot with the polygon for Conductivity
     def update_polygon_con(selected_polygon):
         polygon = Polygon(selected_polygon, closed=True, fill=None, edgecolor='red')
         ax_con.add_patch(polygon)
@@ -116,12 +104,49 @@ try:
     # Create the PolygonSelector for Conductivity
     poly_selector_con = PolygonSelector(ax_con, onselect_con)
 
-    # Save the Conductivity plot
-    plt.savefig('tomography_plot_conductivity.png', dpi=300, bbox_inches='tight')
-
     # Show the plots
     plt.show()
 
-except FileNotFoundError:
-    print("Input file not found.")
-    sys.exit()
+
+def select_data_file():
+    global data_file_path
+    # Ask for the .dat file using a file dialog
+    data_file_path = filedialog.askopenfilename(title="Select .dat Data File", filetypes=[("DAT Files", "*.dat")])
+
+    # Check if a file was selected
+    if not data_file_path:
+        print("No input file selected.")
+        return
+
+    create_plots()
+
+
+def exit_application():
+    plt.close('all')  # Close all matplotlib figures
+    root.destroy()  # Destroy the Tkinter root window
+
+
+# Create the main Tkinter window
+root = Tk()
+root.title("Plot Figures")
+root.geometry("400x300")  # Set the size of the window
+
+# Create a menu
+menu_bar = Menu(root)
+root.config(menu=menu_bar)
+
+# Create a "File" menu
+file_menu = Menu(menu_bar, tearoff=0)
+menu_bar.add_cascade(label="File", menu=file_menu)
+
+# Add a "Plot Figures" option to the "File" menu
+file_menu.add_command(label="Plot Figures", command=select_data_file)
+
+# Add a separator in the "File" menu
+file_menu.add_separator()
+
+# Add an "Exit" option to the "File" menu
+file_menu.add_command(label="Exit", command=exit_application)
+
+# Start the Tkinter event loop
+root.mainloop()
