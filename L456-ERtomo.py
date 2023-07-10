@@ -1,12 +1,21 @@
 import numpy as np
+import tkinter as tk
+from tkinter import ttk, filedialog, messagebox
 import matplotlib.pyplot as plt
 import matplotlib.tri as tri
 from matplotlib.patches import Polygon
 from matplotlib.widgets import PolygonSelector
-from tkinter import Tk, filedialog, Button, Menu
 
+data_file_path = ''  # Define data_file_path globally
 
 def create_plots():
+    global data_file_path
+
+    if not data_file_path:
+        messagebox.showinfo("Error", "No input file selected. Please open a data file first.")
+        print("No input file selected. Please open a data file first.")
+        return
+
     # Load data from the .dat file
     data = np.loadtxt(data_file_path)
 
@@ -118,7 +127,16 @@ def select_data_file():
         print("No input file selected.")
         return
 
-    create_plots()
+    # Clear the existing table
+    for item in tree_view.get_children():
+        tree_view.delete(item)
+
+    # Load data from the .dat file
+    data = np.loadtxt(data_file_path)
+
+    # Insert data into the table
+    for row in data:
+        tree_view.insert('', 'end', values=row)
 
 
 def exit_application():
@@ -127,20 +145,42 @@ def exit_application():
 
 
 # Create the main Tkinter window
-root = Tk()
+root = tk.Tk()
 root.title("Plot Figures")
 root.geometry("400x300")  # Set the size of the window
 
+# Create a Treeview widget to display the data table
+tree_view = ttk.Treeview(root)
+tree_view.pack(fill='both', expand=True)
+
+# Add columns to the Treeview
+tree_view["columns"] = ("Distance", "Depth", "Resistivity", "Conductivity")
+tree_view.column("#0", width=0, stretch='no')
+tree_view.column("Distance", width=70, anchor='center')
+tree_view.column("Depth", width=70, anchor='center')
+tree_view.column("Resistivity", width=100, anchor='center')
+tree_view.column("Conductivity", width=100, anchor='center')
+
+# Set column headings
+tree_view.heading("#0", text="")
+tree_view.heading("Distance", text="Distance (m)")
+tree_view.heading("Depth", text="Depth (m)")
+tree_view.heading("Resistivity", text="Resistivity")
+tree_view.heading("Conductivity", text="Conductivity")
+
 # Create a menu
-menu_bar = Menu(root)
+menu_bar = tk.Menu(root)
 root.config(menu=menu_bar)
 
 # Create a "File" menu
-file_menu = Menu(menu_bar, tearoff=0)
+file_menu = tk.Menu(menu_bar, tearoff=0)
 menu_bar.add_cascade(label="File", menu=file_menu)
 
+# Add an "Open Data File" option to the "File" menu
+file_menu.add_command(label="Open Data File", command=select_data_file)
+
 # Add a "Plot Figures" option to the "File" menu
-file_menu.add_command(label="Plot Figures", command=select_data_file)
+file_menu.add_command(label="Plot Figures", command=create_plots)
 
 # Add a separator in the "File" menu
 file_menu.add_separator()
