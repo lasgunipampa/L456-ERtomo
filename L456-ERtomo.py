@@ -202,9 +202,13 @@ root = tk.Tk()
 root.title("Plot Figures")
 root.geometry("400x300")  # Set the size of the window
 
+# Create a Canvas widget
+canvas = tk.Canvas(root)
+canvas.pack(side="top", fill="both", expand=True)
+
 # Create a Treeview widget to display the data table
-tree_view = ttk.Treeview(root)
-tree_view.pack(fill='both', expand=True)
+tree_view = ttk.Treeview(canvas)
+tree_view.pack(side="top", fill="both", expand=True)
 
 # Add columns to the Treeview
 tree_view["columns"] = ("Distance", "Depth", "Resistivity", "Conductivity")
@@ -220,6 +224,18 @@ tree_view.heading("Distance", text="Distance (m)")
 tree_view.heading("Depth", text="Depth (m)")
 tree_view.heading("Resistivity", text="Resistivity")
 tree_view.heading("Conductivity", text="Conductivity")
+
+# Create a vertical scrollbar
+vsb = ttk.Scrollbar(canvas, orient="vertical", command=tree_view.yview)
+vsb.pack(side="right", fill="y")
+
+# Create a horizontal scrollbar
+hsb = ttk.Scrollbar(canvas, orient="horizontal", command=tree_view.xview)
+hsb.pack(side="bottom", fill="x")
+
+# Configure the Treeview widget to use the scrollbars
+tree_view.configure(yscrollcommand=vsb.set, xscrollcommand=hsb.set)
+canvas.configure(scrollregion=canvas.bbox("all"))
 
 # Create a menu
 menu_bar = tk.Menu(root)
