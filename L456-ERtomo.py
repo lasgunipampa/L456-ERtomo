@@ -74,6 +74,9 @@ try:
     # Create the PolygonSelector for Resistivity
     poly_selector_res = PolygonSelector(ax_res, onselect_res)
 
+    # Save the Resistivity plot
+    plt.savefig('tomography_plot_resistivity.png', dpi=300, bbox_inches='tight')
+
     # Perform grid data interpolation for Conductivity
     interp_tri_con = tri.Triangulation(distance, depth)
     interp_lin_con = tri.LinearTriInterpolator(interp_tri_con, conductivity)
@@ -98,7 +101,7 @@ try:
     # Define a list to store the polygon coordinates for Conductivity
     polygon_coords_con = []
 
-    # Function to update the plot with the polygon for Conductivity
+    # Function to update the plot with the polygon forConductivity
     def update_polygon_con(selected_polygon):
         polygon = Polygon(selected_polygon, closed=True, fill=None, edgecolor='red')
         ax_con.add_patch(polygon)
@@ -113,8 +116,7 @@ try:
     # Create the PolygonSelector for Conductivity
     poly_selector_con = PolygonSelector(ax_con, onselect_con)
 
-    # Save the plots
-    plt.savefig('tomography_plot_resistivity.png', dpi=300, bbox_inches='tight')
+    # Save the Conductivity plot
     plt.savefig('tomography_plot_conductivity.png', dpi=300, bbox_inches='tight')
 
     # Show the plots
