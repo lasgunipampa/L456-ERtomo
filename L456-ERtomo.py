@@ -5,10 +5,8 @@ import matplotlib.tri as tri
 from matplotlib.patches import Polygon
 from matplotlib.widgets import PolygonSelector
 
-
 # Load data from the .dat file
 data = np.loadtxt('./DATA/data_res.dat')
-
 
 # Extract distance, depth, resistivity, and conductivity
 distance = data[:, 0]
@@ -29,11 +27,19 @@ resistivity_interp = interp_lin(xi, yi)
 
 # Create the tomography plot
 fig, ax = plt.subplots(figsize=(12, 4), num='L456 - ERtomo')
-ax.imshow(resistivity_interp, origin='lower', extent=(min(distance), max(distance), min(depth), max(depth)), aspect='auto', cmap='jet')
+image = ax.imshow(resistivity_interp, origin='lower', extent=(min(distance), max(distance), min(depth), max(depth)), aspect='auto', cmap='jet')
 scatter = ax.scatter(distance, depth, c=resistivity, cmap='jet', edgecolors='k', alpha=0.5, marker='o')
 ax.set_xlabel('Distance (m)')
 ax.set_ylabel('Depth (m)')
 ax.set_title('2D Electrical Resistivity Tomography')
+
+# Add a colorbar
+colorbar = plt.colorbar(scatter)
+colorbar.set_label('Resistivity')
+colorbar.ax.yaxis.set_label_coords(-1.5, 0.5)  # Adjust the position of the label
+
+# Increase the colorbar saturation
+colorbar.solids.set(alpha=1)
 
 # Define a list to store the polygon coordinates
 polygon_coords = []
