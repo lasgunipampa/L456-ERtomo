@@ -129,6 +129,16 @@ def create_plots():
         # Create the PolygonSelector for Conductivity
         poly_selector_con = PolygonSelector(ax_con, onselect_con)
 
+        # Save the Resistivity plot
+        resistivity_plot_path = 'tomography_plot_resistivity.png'
+        fig_res.savefig(resistivity_plot_path, dpi=300, bbox_inches='tight')
+        print("Resistivity plot saved as:", resistivity_plot_path)
+
+        # Save the Conductivity plot
+        conductivity_plot_path = 'tomography_plot_conductivity.png'
+        fig_con.savefig(conductivity_plot_path, dpi=300, bbox_inches='tight')
+        print("Conductivity plot saved as:", conductivity_plot_path)
+
         # Show the plots
         plt.show()
 
