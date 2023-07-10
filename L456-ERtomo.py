@@ -17,104 +17,126 @@ def create_plots():
         return
 
     # Load data from the .dat file
-    data = np.loadtxt(data_file_path)
+    #data = np.loadtxt(data_file_path)
 
-    # Extract distance, depth, resistivity, and conductivity
-    distance = data[:, 0]
-    depth = data[:, 1]
-    resistivity = data[:, 2]
-    conductivity = data[:, 3]
+    try:
+        # Load data from the .dat file
+        data = np.loadtxt(data_file_path)
 
-    # Define the grid for the tomography plot
-    grid_resolution = 100  # Adjust this value for desired resolution
-    xi = np.linspace(min(distance), max(distance), grid_resolution)
-    yi = np.linspace(min(depth), max(depth), grid_resolution)
-    xi, yi = np.meshgrid(xi, yi)
+        # Check if the data has four columns
+        if data.shape[1] != 4:
+            messagebox.showinfo("Error", "This file has no valid data format! Make sure the input data (.dat file) has 4 columns.")
+            print("This file has no valid data format! Make sure the input data (.dat file) has 4 columns.")
+            return
 
-    # Perform grid data interpolation for Resistivity
-    interp_tri_res = tri.Triangulation(distance, depth)
-    interp_lin_res = tri.LinearTriInterpolator(interp_tri_res, resistivity)
-    resistivity_interp = interp_lin_res(xi, yi)
+        # Rest of the code for creating plots...
+        # Access data_file_path and data as needed
 
-    # Create the tomography plot for Resistivity
-    fig_res, ax_res = plt.subplots(figsize=(12, 4), num='L456 - ERtomo Resistivity')
-    image_res = ax_res.imshow(resistivity_interp, origin='lower',
-                              extent=(min(distance), max(distance), min(depth), max(depth)),
-                              aspect='auto', cmap='jet')
-    scatter_res = ax_res.scatter(distance, depth, c=resistivity, cmap='jet', edgecolors='k', alpha=0.5, marker='o')
-    ax_res.set_xlabel('Distance (m)')
-    ax_res.set_ylabel('Depth (m)')
-    ax_res.set_title('2D Electrical Resistivity Tomography (Resistivity)')
 
-    # Add a colorbar for Resistivity
-    colorbar_res = plt.colorbar(scatter_res)
-    colorbar_res.set_label('Resistivity')
-    colorbar_res.ax.yaxis.set_label_coords(-1.5, 0.5)  # Adjust the position of the label
+        # Extract distance, depth, resistivity, and conductivity
+        distance = data[:, 0]
+        depth = data[:, 1]
+        resistivity = data[:, 2]
+        conductivity = data[:, 3]
 
-    # Increase the colorbar saturation for Resistivity
-    colorbar_res.solids.set(alpha=1)
 
-    # Define a list to store the polygon coordinates for Resistivity
-    polygon_coords_res = []
+        # Define the grid for the tomography plot
+        grid_resolution = 100  # Adjust this value for desired resolution
+        xi = np.linspace(min(distance), max(distance), grid_resolution)
+        yi = np.linspace(min(depth), max(depth), grid_resolution)
+        xi, yi = np.meshgrid(xi, yi)
 
-    # Function to update the plot with the polygon for Resistivity
-    def update_polygon_res(selected_polygon):
-        polygon = Polygon(selected_polygon, closed=True, fill=None, edgecolor='red')
-        ax_res.add_patch(polygon)
-        plt.draw()
+        # Perform grid data interpolation for Resistivity
+        interp_tri_res = tri.Triangulation(distance, depth)
+        interp_lin_res = tri.LinearTriInterpolator(interp_tri_res, resistivity)
+        resistivity_interp = interp_lin_res(xi, yi)
 
-    # Function to handle mouse events for Resistivity
-    def onselect_res(verts):
-        if len(verts) > 2:
-            selected_polygon = np.array(verts)
-            update_polygon_res(selected_polygon)
+        # Create the tomography plot for Resistivity
+        fig_res, ax_res = plt.subplots(figsize=(12, 4), num='L456 - ERtomo Resistivity')
+        image_res = ax_res.imshow(resistivity_interp, origin='lower',
+                                extent=(min(distance), max(distance), min(depth), max(depth)),
+                                aspect='auto', cmap='jet')
+        scatter_res = ax_res.scatter(distance, depth, c=resistivity, cmap='jet', edgecolors='k', alpha=0.5, marker='o')
+        ax_res.set_xlabel('Distance (m)')
+        ax_res.set_ylabel('Depth (m)')
+        ax_res.set_title('2D Electrical Resistivity Tomography (Resistivity)')
 
-    # Create the PolygonSelector for Resistivity
-    poly_selector_res = PolygonSelector(ax_res, onselect_res)
+        # Add a colorbar for Resistivity
+        colorbar_res = plt.colorbar(scatter_res)
+        colorbar_res.set_label('Resistivity')
+        colorbar_res.ax.yaxis.set_label_coords(-1.5, 0.5)  # Adjust the position of the label
 
-    # Perform grid data interpolation for Conductivity
-    interp_tri_con = tri.Triangulation(distance, depth)
-    interp_lin_con = tri.LinearTriInterpolator(interp_tri_con, conductivity)
-    conductivity_interp = interp_lin_con(xi, yi)
+        # Increase the colorbar saturation for Resistivity
+        colorbar_res.solids.set(alpha=1)
 
-    # Create the tomography plot for Conductivity
-    fig_con, ax_con = plt.subplots(figsize=(12, 4), num='L456 - ERtomo Conductivity')
-    image_con = ax_con.imshow(conductivity_interp, origin='lower',
-                              extent=(min(distance), max(distance), min(depth), max(depth)),
-                              aspect='auto', cmap='jet')
-    scatter_con = ax_con.scatter(distance, depth, c=conductivity, cmap='jet', edgecolors='k', alpha=0.5, marker='o')
-    ax_con.set_xlabel('Distance (m)')
-    ax_con.set_ylabel('Depth (m)')
-    ax_con.set_title('2D Electrical Resistivity Tomography (Conductivity)')
+        # Define a list to store the polygon coordinates for Resistivity
+        polygon_coords_res = []
 
-    # Add a colorbar for Conductivity
-    colorbar_con = plt.colorbar(scatter_con)
-    colorbar_con.set_label('Conductivity')
-    colorbar_con.ax.yaxis.set_label_coords(-1.5, 0.5)  # Adjust the position of the label
+        # Function to update the plot with the polygon for Resistivity
+        def update_polygon_res(selected_polygon):
+            polygon = Polygon(selected_polygon, closed=True, fill=None, edgecolor='red')
+            ax_res.add_patch(polygon)
+            plt.draw()
 
-    # Increase the colorbar saturation for Conductivity
-    colorbar_con.solids.set(alpha=1)
+        # Function to handle mouse events for Resistivity
+        def onselect_res(verts):
+            if len(verts) > 2:
+                selected_polygon = np.array(verts)
+                update_polygon_res(selected_polygon)
 
-    # Define a list to store the polygon coordinates for Conductivity
-    polygon_coords_con = []
+        # Create the PolygonSelector for Resistivity
+        poly_selector_res = PolygonSelector(ax_res, onselect_res)
 
-    # Function to update the plot with the polygon for Conductivity
-    def update_polygon_con(selected_polygon):
-        polygon = Polygon(selected_polygon, closed=True, fill=None, edgecolor='red')
-        ax_con.add_patch(polygon)
-        plt.draw()
+        # Perform grid data interpolation for Conductivity
+        interp_tri_con = tri.Triangulation(distance, depth)
+        interp_lin_con = tri.LinearTriInterpolator(interp_tri_con, conductivity)
+        conductivity_interp = interp_lin_con(xi, yi)
 
-    # Function to handle mouse events for Conductivity
-    def onselect_con(verts):
-        if len(verts) > 2:
-            selected_polygon = np.array(verts)
-            update_polygon_con(selected_polygon)
+        # Create the tomography plot for Conductivity
+        fig_con, ax_con = plt.subplots(figsize=(12, 4), num='L456 - ERtomo Conductivity')
+        image_con = ax_con.imshow(conductivity_interp, origin='lower',
+                                extent=(min(distance), max(distance), min(depth), max(depth)),
+                                aspect='auto', cmap='jet')
+        scatter_con = ax_con.scatter(distance, depth, c=conductivity, cmap='jet', edgecolors='k', alpha=0.5, marker='o')
+        ax_con.set_xlabel('Distance (m)')
+        ax_con.set_ylabel('Depth (m)')
+        ax_con.set_title('2D Electrical Resistivity Tomography (Conductivity)')
 
-    # Create the PolygonSelector for Conductivity
-    poly_selector_con = PolygonSelector(ax_con, onselect_con)
+        # Add a colorbar for Conductivity
+        colorbar_con = plt.colorbar(scatter_con)
+        colorbar_con.set_label('Conductivity')
+        colorbar_con.ax.yaxis.set_label_coords(-1.5, 0.5)  # Adjust the position of the label
 
-    # Show the plots
-    plt.show()
+        # Increase the colorbar saturation for Conductivity
+        colorbar_con.solids.set(alpha=1)
+
+        # Define a list to store the polygon coordinates for Conductivity
+        polygon_coords_con = []
+
+        # Function to update the plot with the polygon for Conductivity
+        def update_polygon_con(selected_polygon):
+            polygon = Polygon(selected_polygon, closed=True, fill=None, edgecolor='red')
+            ax_con.add_patch(polygon)
+            plt.draw()
+
+        # Function to handle mouse events for Conductivity
+        def onselect_con(verts):
+            if len(verts) > 2:
+                selected_polygon = np.array(verts)
+                update_polygon_con(selected_polygon)
+
+        # Create the PolygonSelector for Conductivity
+        poly_selector_con = PolygonSelector(ax_con, onselect_con)
+
+        # Show the plots
+        plt.show()
+
+    except Exception as e:
+        #messagebox.showinfo("Error", "An error occurred while loading the data file.")
+        #print("An error occurred while loading the data file:", e)
+        error_message = f"An error occurred while loading the data file:\n{str(e)}"
+        messagebox.showinfo("Error", error_message)
+        print(error_message)
 
 
 def select_data_file():
@@ -124,19 +146,41 @@ def select_data_file():
 
     # Check if a file was selected
     if not data_file_path:
+        messagebox.showinfo("Error", "No input file selected.")
         print("No input file selected.")
         return
-
-    # Clear the existing table
-    for item in tree_view.get_children():
-        tree_view.delete(item)
-
+    
     # Load data from the .dat file
-    data = np.loadtxt(data_file_path)
+    try:
+        data = np.loadtxt(data_file_path)
 
-    # Insert data into the table
-    for row in data:
-        tree_view.insert('', 'end', values=row)
+        # Check if the data has four columns
+        if data.shape[1] != 4:
+            messagebox.showinfo("Error", "This file has no valid data format! Make sure the input data (.dat file) has 4 columns.")
+            data_file_path = ''  # Reset data_file_path if the data format is invalid
+            return
+
+        # Clear the existing table
+        for item in tree_view.get_children():
+            tree_view.delete(item)
+
+        # Load data from the .dat file
+        data = np.loadtxt(data_file_path)
+
+        """ # Insert data into the table
+        for row in data:
+            tree_view.insert('', 'end', values=row) """
+        
+        # Insert data into the table
+        for row in data:
+            # Convert each value to string and remove square brackets
+            row_values = [str(value).strip('[]') for value in row]
+            tree_view.insert('', 'end', values=row_values)
+
+
+
+    except Exception as e:
+        messagebox.showinfo("Error", "An error occurred while loading the data file.")
 
 
 def exit_application():
